@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#141519">
+<meta name="description" content="Auxed is your personal music journal. Rate albums, log repeat listens, collect favorites, and curate lists.">
+<title>Auxed — Your taste. On record.</title>
+<style>
+:root{color-scheme:dark;--bg:#141519;--panel:#1d1f25;--panel2:#272930;--line:#33353d;--text:#f4f1ea;--muted:#a5a7b1;--accent:#f16a5b;--gold:#e8bd65}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button,input,textarea,select{outline-offset:4px}
+button:focus-visible,a:focus-visible{outline:2px solid var(--accent)}
+button{color:inherit}
+button:disabled{cursor:default;opacity:.35}
+button,input,select,textarea{touch-action:manipulation}
+.sidebar{position:fixed;inset:0 auto 0 0;width:218px;background:#18191e;border-right:1px solid var(--line);padding:30px 17px;display:flex;flex-direction:column;z-index:5}
+.brand{display:flex;align-items:center;gap:10px;margin:0 11px 40px;font-size:27px;font-weight:850;letter-spacing:-1.4px}
+.mark{display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:var(--accent);color:#261714;font-size:25px}
+.nav-caption,.eyebrow{font-size:10px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase}
+.nav-caption{margin:0 12px 10px;color:#777a85}
+nav{display:grid;gap:5px}
+nav button{display:flex;align-items:center;gap:12px;padding:11px 13px;background:none;border:0;border-radius:10px;text-align:left;color:var(--muted)}
+nav button:hover{background:#22242b;color:var(--text)}
+nav button.active{background:#2b282b;color:var(--text);box-shadow:inset 3px 0 var(--accent)}
+.nav-icon{width:22px;text-align:center;font-size:19px}
+.sidebar-foot{margin-top:auto;padding:15px 10px 0;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:#44343c;color:#ffd2c9;font-weight:800;flex-shrink:0}
+.sidebar-foot strong{display:block;font-size:12px}.sidebar-foot small{color:var(--muted);font-size:11px}
+main{margin-left:218px;padding:29px 42px 65px;max-width:1600px}
+.topbar{display:flex;gap:14px;align-items:center;justify-content:space-between;margin-bottom:35px}
+.searchbox{display:flex;gap:10px;align-items:center;width:min(430px,65%);padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:11px;color:var(--muted)}
+.searchbox input{width:100%;background:none;border:0;color:var(--text);outline:0}
+.searchbox:focus-within{border-color:var(--accent)}
+input::placeholder,textarea::placeholder{color:#7f818d}
+.primary,.secondary,.ghost,.danger{border:0;border-radius:9px;padding:10px 15px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.primary{background:var(--accent);color:#291815}.primary:hover{background:#ff8372}
+.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.secondary:hover{background:#33353e}
+.ghost{background:none;color:var(--muted);padding:6px 8px}.ghost:hover{background:var(--panel2);color:var(--text)}
+.danger{background:#3d2529;color:#ffb9b9}.small{padding:7px 10px;font-size:12px}
+.actions{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.page-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:25px}
+.eyebrow{margin:0 0 8px;color:var(--accent)}h1,h2,h3,p{margin-top:0}
+h1{margin-bottom:9px;font-size:clamp(29px,3.2vw,43px);line-height:1.1;letter-spacing:-1.7px}
+h2{font-size:19px;letter-spacing:-.5px;margin:0}h3{font-size:15px;letter-spacing:-.2px}
+.subtitle,.muted{color:var(--muted)}.subtitle{margin:0;max-width:590px}
+.hero{position:relative;overflow:hidden;padding:32px;border:1px solid #4a3435;border-radius:19px;background:radial-gradient(ellipse at 100% 10%,#793c3e55,transparent 65%),#211d22;margin-bottom:22px}
+.hero h1{font-size:clamp(32px,4.1vw,54px);max-width:600px}.hero .primary{margin-top:20px}
+.hero-badge{display:inline-block;color:#e3b5ae;background:#f16a5b12;border:1px solid #72413d;padding:4px 9px;border-radius:30px;font-size:10px;font-weight:750;letter-spacing:.7px;margin-bottom:15px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+.stat{padding:17px 19px;background:var(--panel);border:1px solid var(--line);border-radius:12px}.stat strong{display:block;font-size:26px;line-height:1.3;letter-spacing:-.8px}.stat span{color:var(--muted);font-size:11px}
+.section{margin-top:31px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:16px}
+.link{border:0;padding:2px;background:none;color:var(--accent);font-size:12px;font-weight:700}.link:hover{color:#ffa69a}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:17px}.album-card{min-width:0}
+.cover-button{display:block;width:100%;padding:0;border:0;background:none;border-radius:11px;text-align:inherit}.cover-button:hover .art{transform:translateY(-3px);filter:brightness(1.08)}
+.art{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;aspect-ratio:1;border-radius:11px;isolation:isolate;background:#554750;border:1px solid #ffffff13;box-shadow:0 5px 20px #0003;transition:transform .18s,filter .18s}
+.art:before{content:"";position:absolute;width:75%;height:75%;border:1px solid #fff5;border-radius:50%;box-shadow:0 0 0 12px #ffffff0d,0 0 0 25px #ffffff08;z-index:-1}
+.art:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,#ffffff08 0px,#ffffff08 1px,transparent 1px,transparent 4px);z-index:-1}
+.art-label{color:#fff;padding:13px;font-size:clamp(12px,1.45vw,20px);line-height:1.1;letter-spacing:-.7px;font-weight:850;text-align:center;text-transform:uppercase;text-shadow:0 2px 10px #0006}
+.art-1{background:linear-gradient(140deg,#e0a257,#a64839 56%,#442736)}.art-2{background:linear-gradient(145deg,#c6d6ce,#638b7e 48%,#29414a)}.art-3{background:linear-gradient(140deg,#e5bd97,#b66c59 46%,#53394d)}.art-4{background:linear-gradient(145deg,#c0bfd3,#686481 50%,#312e4d)}.art-5{background:linear-gradient(135deg,#e6d278,#ae6f40 52%,#593741)}.art-6{background:linear-gradient(135deg,#b9c6c9,#567581 48%,#2d3c51)}.art-7{background:linear-gradient(145deg,#d2ccbb,#897356 50%,#3f363b)}.art-8{background:linear-gradient(135deg,#cda3c2,#905878 48%,#382b50)}.art-9{background:linear-gradient(135deg,#d5b98a,#7f815c 50%,#42534a)}.art-10{background:linear-gradient(145deg,#e9a180,#a54e53 52%,#38284a)}.art-11{background:linear-gradient(135deg,#e49b5c,#ba5b25 55%,#554032)}.art-12{background:linear-gradient(145deg,#7589ac,#3e4c76 55%,#23273c)}
+.album-title{display:block;max-width:100%;padding:0;margin:10px 0 2px;border:0;background:none;font-size:13px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}.album-title:hover{color:var(--accent)}
+.artist{margin:0;color:var(--muted);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.card-foot{display:flex;align-items:center;justify-content:space-between;min-height:22px;margin-top:4px;gap:4px}
+.stars{display:inline-block;position:relative;white-space:nowrap;line-height:1.2;letter-spacing:1px;font-family:Arial,sans-serif;color:#565963;font-size:14px}.stars .filled{position:absolute;inset:0 auto 0 0;overflow:hidden;color:var(--gold);white-space:nowrap}.rating-number{color:var(--muted);font-size:11px;margin-left:5px}.heart{color:var(--accent)}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border:1px solid var(--line);background:#ffffff04;border-radius:30px;color:var(--muted);font-size:10px}.demo{color:#d6b68c;border-color:#544536;background:#b17d3612}.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.note{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:13px 16px;border:1px solid #4a3c32;border-radius:11px;background:#251f1c;color:#c7b8a7;font-size:12px;margin:18px 0}.notice-error{border-color:#81413b;background:#3a2224;color:#ffd0ca}
+.toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin:22px 0}.select{padding:8px 11px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px}
+.entries{display:grid;gap:12px}.entry{display:grid;grid-template-columns:66px 1fr;gap:16px;border:1px solid var(--line);border-radius:13px;padding:17px;background:var(--panel)}.entry .art{width:66px;border-radius:8px}.entry .art-label{font-size:9px;padding:5px;letter-spacing:-.2px}.entry .art:before{box-shadow:none}
+.entry-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.entry-title{font-size:14px;font-weight:750;border:0;background:none;padding:0;text-align:left}.entry-title:hover{color:var(--accent)}.entry-meta{color:var(--muted);font-size:11px;margin:3px 0 9px}.review{margin:10px 0 0;color:#d2d1d3;font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}.entry-actions{display:flex;gap:5px;align-items:center}
+.empty{grid-column:1/-1;padding:35px 20px;border:1px dashed #40434e;border-radius:13px;text-align:center;color:var(--muted)}.empty strong{display:block;color:var(--text);margin-bottom:5px}.empty .primary{margin-top:15px}.empty p{margin:0;font-size:12px}
+.detail{display:grid;grid-template-columns:230px 1fr;gap:32px;align-items:start;margin:23px 0 30px}.detail .art-label{font-size:29px}.detail h1{margin:8px 0 6px}.detail .artist-name{font-size:18px;color:#d2cfd3;margin-bottom:10px}.detail .actions{margin-top:23px}.detail .detail-rating{margin-top:19px}.detail-rating .stars{font-size:20px}.detail-copy{color:var(--muted);font-size:12px;margin-top:15px}.breadcrumb{display:inline-flex;gap:5px;border:0;background:none;padding:0;color:var(--muted);font-size:12px}
+.list-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.list-card{background:var(--panel);padding:14px;border:1px solid var(--line);border-radius:13px;min-width:0}.list-cover{display:grid;grid-template-columns:1fr 1fr;gap:4px;overflow:hidden;border-radius:9px;margin-bottom:13px}.list-cover .art{border-radius:0;box-shadow:none}.list-cover .art-label{font-size:12px}.list-card>button{border:0;padding:0;background:none;width:100%;text-align:left}.list-card h3{margin:0 0 4px;overflow-wrap:anywhere}.list-card p{font-size:11px;margin:0;color:var(--muted)}.list-placeholder{aspect-ratio:2;display:grid;place-items:center;font-size:36px;color:#666575;background:linear-gradient(140deg,#35313e,#24242d);border-radius:9px;margin-bottom:13px}.reorder{display:flex;justify-content:center;gap:7px;margin-top:8px}.reorder button{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 10px}
+.profile-header{display:flex;align-items:center;gap:20px;padding:23px;background:linear-gradient(110deg,#30242c,#1d2026);border:1px solid #46333e;border-radius:15px}.profile-header .avatar{width:70px;height:70px;font-size:25px}.profile-header h1{font-size:30px;margin-bottom:5px}.profile-header p{margin:0;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere}.profile-header .actions{margin-left:auto}
+.settings{padding:20px;border:1px solid var(--line);background:var(--panel);border-radius:12px}.settings p{font-size:12px;color:var(--muted);margin:7px 0 15px}.settings .actions{gap:10px}.artist-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:13px}.artist-row:last-child{border-bottom:0}.artist-row span{color:var(--muted);font-size:12px}
+dialog{width:min(560px,calc(100vw - 28px));max-height:90vh;padding:0;background:var(--panel);color:var(--text);border:1px solid #46424d;border-radius:16px;box-shadow:0 24px 90px #0009}dialog::backdrop{background:#090a0dd4;backdrop-filter:blur(5px)}.dialog-head{display:flex;justify-content:space-between;align-items:center;padding:20px 23px;border-bottom:1px solid var(--line)}.dialog-head h2{margin:0}.close{border:0;background:none;color:var(--muted);font-size:25px;line-height:1;padding:4px}
+.form{display:grid;gap:16px;padding:21px 23px}.field{display:grid;gap:6px}.field label,.field-label{color:#d6d3d5;font-size:12px;font-weight:700}.field input:not([type=range]),.field textarea{width:100%;padding:10px 12px;border:1px solid #40414c;border-radius:8px;background:#15161b;color:var(--text)}.field input:focus,.field textarea:focus{outline:1px solid var(--accent);border-color:var(--accent)}.field textarea{resize:vertical;min-height:93px}.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}input[type=range]{width:100%;accent-color:var(--accent)}.rating-display{display:flex;justify-content:space-between;align-items:center}.checkbox{display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer}.checkbox input{accent-color:var(--accent);width:16px;height:16px}.form-bottom{display:flex;justify-content:flex-end;gap:9px;border-top:1px solid var(--line);padding-top:17px;margin-top:3px}.form-bottom .danger{margin-right:auto}.hint{color:var(--muted);font-size:11px;margin:0}
+.album-picker{max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:9px;padding:5px}.pick-row{display:flex;gap:10px;align-items:center;padding:9px;cursor:pointer;border-radius:6px}.pick-row:hover{background:var(--panel2)}.pick-row input{accent-color:var(--accent)}.pick-row strong{font-size:12px;display:block}.pick-row small{color:var(--muted);font-size:11px}
+.toast{position:fixed;bottom:24px;right:24px;z-index:20;max-width:min(390px,90vw);padding:12px 17px;border:1px solid #4a4651;border-radius:10px;background:#2a2932;box-shadow:0 7px 25px #0007;opacity:0;transform:translateY(10px);transition:.18s;pointer-events:none;font-size:12px}.toast.show{opacity:1;transform:translateY(0)}.mobile-nav{display:none}[hidden]{display:none!important}
+@media(min-width:1450px){.grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media(max-width:1100px){main{padding:28px 27px 65px}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.list-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.detail{grid-template-columns:190px 1fr;gap:25px}}
+@media(max-width:800px){.sidebar{display:none}main{margin:0;padding:20px 18px 100px}.topbar{margin-bottom:25px}.mobile-nav{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;inset:auto 0 0;z-index:10;padding:6px 5px max(7px,env(safe-area-inset-bottom));background:#18191ef5;border-top:1px solid var(--line);backdrop-filter:blur(12px);gap:0}.mobile-nav button{display:grid;justify-items:center;gap:0;font-size:9px;padding:5px 2px;border-radius:5px}.mobile-nav .nav-icon{font-size:19px}.mobile-nav button.active{box-shadow:none;background:none;color:var(--accent)}.toast{bottom:85px}.art-label{font-size:15px}.detail .art-label{font-size:22px}}
+@media(max-width:540px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 13px}.hero{padding:24px 20px}.hero h1{font-size:38px}.topbar>.primary{font-size:12px;padding:10px 11px;white-space:nowrap}.searchbox{width:100%;padding:9px 11px}.searchbox input{font-size:12px}.stats{gap:7px}.stat{padding:13px 11px}.stat strong{font-size:23px}.stat span{font-size:10px}.page-heading{align-items:flex-start}.page-heading .primary{font-size:11px;white-space:nowrap;padding:9px 10px}.detail{grid-template-columns:115px 1fr;gap:18px}.detail h1{font-size:27px;letter-spacing:-1px}.detail .artist-name{font-size:14px}.detail .actions{grid-column:1/-1}.detail .art-label{font-size:16px}.detail-rating .stars{font-size:15px}.entry{grid-template-columns:46px 1fr;padding:13px;gap:11px}.entry .art{width:46px}.entry-top{flex-wrap:wrap;gap:4px}.entry-actions{margin-left:auto}.entry-actions .ghost{padding:3px 6px;font-size:11px}.list-grid{gap:10px}.list-card{padding:10px}.list-cover .art-label{font-size:9px}.list-card h3{font-size:13px}.profile-header{gap:13px;flex-wrap:wrap;padding:18px}.profile-header .avatar{width:50px;height:50px;font-size:20px}.profile-header h1{font-size:27px}.profile-header .actions{width:100%;margin-left:0}.note{align-items:flex-start;flex-direction:column;gap:8px}.row{grid-template-columns:1fr}.art-label{font-size:18px}.dialog-head,.form{padding-left:18px;padding-right:18px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand"><span class="mark">a</span>auxed</div>
+  <p class="nav-caption">Your listening life</p>
+  <nav id="desktopNav" aria-label="Main navigation"></nav>
+  <div class="sidebar-foot"><div class="avatar" id="sidebarAvatar">C</div><div><strong id="sidebarName">Cade</strong><small>Your personal collection</small></div></div>
+</aside>
+<main>
+  <header class="topbar">
+    <label class="searchbox"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search albums or artists" aria-label="Search albums or artists"></label>
+    <button class="primary" data-act="log">＋ Log a listen</button>
+  </header>
+  <div id="saveNotice" class="note notice-error" role="status" hidden></div>
+  <div id="content"></div>
+</main>
+<nav id="mobileNav" class="mobile-nav" aria-label="Mobile navigation"></nav>
+<dialog id="modal" aria-labelledby="dialogTitle">
+  <div class="dialog-head"><h2 id="dialogTitle"></h2><button class="close" data-act="close" aria-label="Close dialog">×</button></div>
+  <div id="dialogBody"></div>
+</dialog>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+"use strict";
+const KEY="auxed.collection.v1";
+const $=id=>document.getElementById(id);
+const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=prefix=>prefix+"_"+(globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+Math.random().toString(36).slice(2));
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
+const catalog=[
+{id:"s1",title:"Golden Hour",artist:"Kacey Musgraves",year:2018,genre:"Country",art:1},
+{id:"s2",title:"Blue Weekend",artist:"Wolf Alice",year:2021,genre:"Alternative",art:2},
+{id:"s3",title:"The Record",artist:"boygenius",year:2023,genre:"Indie",art:3},
+{id:"s4",title:"Punisher",artist:"Phoebe Bridgers",year:2020,genre:"Indie",art:4},
+{id:"s5",title:"Jubilee",artist:"Japanese Breakfast",year:2021,genre:"Indie",art:5},
+{id:"s6",title:"Carrie & Lowell",artist:"Sufjan Stevens",year:2015,genre:"Folk",art:6},
+{id:"s7",title:"For Emma, Forever Ago",artist:"Bon Iver",year:2007,genre:"Folk",art:7},
+{id:"s8",title:"Heard It in a Past Life",artist:"Maggie Rogers",year:2019,genre:"Pop",art:8},
+{id:"s9",title:"The New Abnormal",artist:"The Strokes",year:2020,genre:"Alternative",art:9},
+{id:"s10",title:"Being Funny in a Foreign Language",artist:"The 1975",year:2022,genre:"Pop",art:10},
+{id:"s11",title:"Blonde",artist:"Frank Ocean",year:2016,genre:"R&B",art:11},
+{id:"s12",title:"After Hours",artist:"The Weeknd",year:2020,genre:"R&B",art:12}
+];
+function freshData(){
+  const dates=[0,2,5,9];
+  return {
+    version:1,
+    profile:{name:"Cade",bio:"Collecting albums and opinions."},
+    albums:catalog.map(a=>({...a})),
+    entries:catalog.slice(0,4).map((a,i)=>{
+      const d=new Date();d.setDate(d.getDate()-dates[i]);
+      const date=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      return {id:"demo_"+i,albumId:a.id,date,rating:[4.5,4,5,4.5][i],review:[
+        "Warm songwriting that gets better with every listen.",
+        "Big guitars and even bigger feelings.",
+        "An album I wanted to start again as soon as it finished.",
+        "A good companion for a long drive."
+      ][i],tags:[["on repeat"],["headphones"],["favorite discovery"],["late night"]][i],demo:true};
+    }),
+    favorites:[],queue:[],
+    lists:[
+      {id:"demo_list1",name:"The long way home",description:"A few albums for a good drive.",albumIds:["s1","s4","s7"],demo:true},
+      {id:"demo_list2",name:"Weekend rotation",description:"Music to spend a little time with.",albumIds:["s2","s3","s5","s8"],demo:true}
+    ]
+  };
+}
+let storageWarning="";
+function validate(d){
+  if(!d||d.version!==1||!d.profile||typeof d.profile.name!=="string"||typeof d.profile.bio!=="string")return false;
+  if(!["albums","entries","favorites","queue","lists"].every(k=>Array.isArray(d[k])))return false;
+  const idOkay=id=>typeof id==="string"&&/^[a-zA-Z0-9_-]{1,100}$/.test(id);
+  const unique=arr=>new Set(arr.map(x=>x?.id)).size===arr.length;
+  if(!unique(d.albums)||!unique(d.entries)||!unique(d.lists))return false;
+  if(!d.albums.every(a=>a&&idOkay(a.id)&&typeof a.title==="string"&&a.title.trim()&&typeof a.artist==="string"&&a.artist.trim()&&Number.isInteger(a.art)&&a.art>=1&&a.art<=12&&(a.year===null||Number.isInteger(a.year))&&typeof a.genre==="string"))return false;
+  const ids=new Set(d.albums.map(a=>a.id));
+  if(!d.entries.every(e=>e&&idOkay(e.id)&&ids.has(e.albumId)&&typeof e.date==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)&&!Number.isNaN(new Date(e.date+"T12:00:00").getTime())&&typeof e.rating==="number"&&e.rating>=0&&e.rating<=5&&Number.isInteger(e.rating*2)&&typeof e.review==="string"&&Array.isArray(e.tags)&&e.tags.every(t=>typeof t==="string")))return false;
+  if(!d.favorites.every(id=>ids.has(id))||!d.queue.every(id=>ids.has(id)))return false;
+  return d.lists.every(l=>l&&idOkay(l.id)&&typeof l.name==="string"&&typeof l.description==="string"&&Array.isArray(l.albumIds)&&new Set(l.albumIds).size===l.albumIds.length&&l.albumIds.every(id=>ids.has(id)));
+}
+function readData(){
+  try{
+    const existing=localStorage.getItem(KEY);
+    if(existing){const parsed=JSON.parse(existing);if(validate(parsed))return parsed;throw new Error("Invalid saved data")}
+    const old=localStorage.getItem("sideb_entries");
+    if(old!==null){
+      const oldEntries=JSON.parse(old);
+      if(!Array.isArray(oldEntries))throw new Error("Invalid old diary");
+      const migrated=freshData();migrated.entries=[];migrated.lists=[];
+      oldEntries.forEach(e=>{
+        if(!e||typeof e.title!=="string"||typeof e.artist!=="string")return;
+        let a=migrated.albums.find(a=>a.title.toLowerCase()===e.title.toLowerCase()&&a.artist.toLowerCase()===e.artist.toLowerCase());
+        if(!a){a={id:uid("album"),title:e.title,artist:e.artist,year:null,genre:"Uncategorized",art:(migrated.albums.length%12)+1};migrated.albums.push(a)}
+        migrated.entries.push({id:uid("entry"),albumId:a.id,date:e.date||today(),rating:Math.max(0,Math.min(5,Math.round(Number(e.rating||0)*2)/2)),review:String(e.review||""),tags:[],demo:false});
+        if(e.favorite&&!migrated.favorites.includes(a.id))migrated.favorites.push(a.id);
+      });
+      const oldLists=JSON.parse(localStorage.getItem("sideb_lists")||"[]");
+      if(Array.isArray(oldLists))migrated.lists=oldLists.map(l=>({id:uid("list"),name:String(l.name||"Untitled list"),description:String(l.description||""),albumIds:[...new Set((Array.isArray(l.ids)?l.ids:[]).filter(id=>migrated.albums.some(a=>a.id===id)))],demo:false}));
+      if(validate(migrated))return migrated;
+    }
+  }catch(error){storageWarning="Saved data could not be loaded. This session is using a fresh collection. Download a backup before closing if browser saving is unavailable."}
+  return freshData();
+}
+let data=readData();
+const state={view:"home",id:null,query:"",genre:"All genres",sort:"title",diaryFilter:"all"};
+const album=id=>data.albums.find(a=>a.id===id);
+const sortedEntries=()=>[...data.entries].sort((a,b)=>b.date.localeCompare(a.date));
+const albumEntries=id=>sortedEntries().filter(e=>e.albumId===id);
+const latest=id=>albumEntries(id)[0];
+const avg=entries=>{const rated=entries.filter(e=>e.rating>0);return rated.length?rated.reduce((s,e)=>s+e.rating,0)/rated.length:0};
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(data));storageWarning="";updateSaveNotice();return true}
+  catch{storageWarning="Browser saving is unavailable. Your changes work for this session; download a backup from Profile to keep them.";updateSaveNotice();return false}
+}
+function updateSaveNotice(){$("saveNotice").hidden=!storageWarning;$("saveNotice").textContent=storageWarning}
+function commit(message){const saved=save();render();toast(saved?message:message+" — download a backup to keep this change.")}
+function toast(message){$("toast").textContent=message;$("toast").classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>$("toast").classList.remove("show"),3300)}
+const navItems=[["home","⌂","Home"],["browse","⌕","Browse"],["diary","▤","Diary"],["queue","⊕","Queue"],["lists","☷","Lists"],["profile","◉","You"]];
+function renderNav(){
+  const active=state.view==="album"?"browse":state.view==="list"?"lists":state.view;
+  const markup=navItems.map(([id,icon,label])=>`<button data-act="nav" data-view="${id}" class="${active===id?"active":""}" ${active===id?'aria-current="page"':""}><span class="nav-icon" aria-hidden="true">${icon}</span>${label}</button>`).join("");
+  $("desktopNav").innerHTML=markup;$("mobileNav").innerHTML=markup;
+  $("sidebarName").textContent=data.profile.name||"Your profile";
+  $("sidebarAvatar").textContent=initials(data.profile.name);
+}
+function initials(name){return name.trim().split(/\s+/).filter(Boolean).slice(0,2).map(s=>Array.from(s)[0]).join("").toUpperCase()||"A"}
+function route(view,id=null){state.view=view;state.id=id;render();window.scrollTo({top:0,behavior:"auto"})}
+function ratingMarkup(value){
+  if(!value)return '<span class="muted" style="font-size:11px">Not rated</span>';
+  return `<span role="img" aria-label="${value.toFixed(1)} out of 5 stars"><span class="stars" aria-hidden="true">★★★★★<span class="filled" style="width:${value*20}%">★★★★★</span></span><span class="rating-number">${value.toFixed(1)}</span></span>`;
+}
+function art(a){return `<div class="art art-${a.art}" aria-hidden="true"><span class="art-label">${esc(a.title)}</span></div>`}
+function card(a){
+  const entry=latest(a.id);
+  return `<article class="album-card">
+    <button class="cover-button" data-act="album" data-id="${esc(a.id)}" aria-label="Open ${esc(a.title)} by ${esc(a.artist)}">${art(a)}</button>
+    <button class="album-title" data-act="album" data-id="${esc(a.id)}" title="${esc(a.title)}">${esc(a.title)}</button>
+    <p class="artist">${esc(a.artist)}</p>
+    <div class="card-foot">${entry?ratingMarkup(entry.rating):`<span class="muted" style="font-size:10px">${a.year||"Added by you"}</span>`}${data.favorites.includes(a.id)?'<span class="heart" aria-label="Favorite">♥</span>':""}</div>
+  </article>`;
+}
+function grid(albums){return `<div class="grid">${albums.map(card).join("")}</div>`}
+function empty(title,copy,action="log",label="Log an album"){
+  return `<div class="empty"><strong>${esc(title)}</strong><p>${esc(copy)}</p>${action?`<button class="primary small" data-act="${action}">${esc(label)}</button>`:""}</div>`;
+}
+function heading(kicker,title,copy,actions=""){return `<div class="page-heading"><div><p class="eyebrow">${esc(kicker)}</p><h1>${esc(title)}</h1><p class="subtitle">${esc(copy)}</p></div>${actions}</div>`}
+function section(title,body,target="",label="See all"){
+  return `<section class="section"><div class="section-head"><h2>${esc(title)}</h2>${target?`<button class="link" data-act="nav" data-view="${target}">${label} →</button>`:""}</div>${body}</section>`;
+}
+function formatDate(date){return new Date(date+"T12:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}
+function entryCard(e){
+  const a=album(e.albumId);
+  return `<article class="entry">
+    <button class="cover-button" data-act="album" data-id="${esc(a.id)}" aria-label="Open ${esc(a.title)}">${art(a)}</button>
+    <div>
+      <div class="entry-top"><div><button class="entry-title" data-act="album" data-id="${esc(a.id)}">${esc(a.title)}</button><div class="entry-meta">${esc(a.artist)} · ${formatDate(e.date)} ${e.demo?'<span class="tag demo">Sample</span>':""}</div></div>
+        <div class="entry-actions"><button class="ghost small" data-act="log" data-id="${esc(a.id)}">＋ Again</button><button class="ghost small" data-act="edit-entry" data-id="${esc(e.id)}">Edit</button></div>
+      </div>
+      ${ratingMarkup(e.rating)}
+      ${e.review?`<p class="review">${esc(e.review)}</p>`:""}
+      ${e.tags.length?`<div class="tags">${e.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`:""}
+    </div>
+  </article>`;
+}
+function home(){
+  const entries=sortedEntries();
+  const unique=[...new Set(entries.map(e=>e.albumId))].slice(0,5).map(album);
+  const year=new Date().getFullYear();
+  return `<div class="hero"><span class="hero-badge">AUXED · YOUR PERSONAL MUSIC JOURNAL</span><h1>Your taste.<br>On record.</h1><p class="subtitle">The albums you loved. The ones you didn’t. Every listen has a place.</p><button class="primary" data-act="log">＋ What did you listen to?</button></div>
+    ${data.entries.some(e=>e.demo)?'<div class="note"><span>You’re viewing sample listens. Add your own, or start with an empty diary.</span><button class="link" data-act="remove-demo">Remove sample data →</button></div>':""}
+    <div class="stats"><div class="stat"><strong>${new Set(entries.map(e=>e.albumId)).size}</strong><span>different albums</span></div><div class="stat"><strong>${entries.filter(e=>e.date.startsWith(String(year))).length}</strong><span>listens in ${year}</span></div><div class="stat"><strong>${avg(entries)?avg(entries).toFixed(1):"—"}</strong><span>average rating / 5</span></div></div>
+    ${section("Recently in your headphones",unique.length?grid(unique):empty("Your diary starts here","Log an album and give it your take."),"diary","Open diary")}
+    ${section("Your latest takes",entries.filter(e=>e.review).length?`<div class="entries">${entries.filter(e=>e.review).slice(0,2).map(entryCard).join("")}</div>`:empty("A little context goes a long way","Your reviews and notes will show up here."),"diary")}
+    ${section("Up next",data.queue.length?grid(data.queue.slice(0,5).map(album)):empty("Keep your next listen close","Save albums to your queue from any album page.","browse","Explore albums"),"queue","Your queue")}`;
+}
+function browse(){
+  let result=data.albums.filter(a=>`${a.title} ${a.artist}`.toLowerCase().includes(state.query.toLowerCase())&&(state.genre==="All genres"||a.genre===state.genre));
+  result.sort((a,b)=>state.sort==="year"?(b.year||0)-(a.year||0):state.sort==="artist"?a.artist.localeCompare(b.artist):a.title.localeCompare(b.title));
+  const genres=["All genres",...new Set(data.albums.map(a=>a.genre))].sort((a,b)=>a==="All genres"?-1:b==="All genres"?1:a.localeCompare(b));
+  return heading("Find your next obsession","Explore the collection","Browse the starter catalog, or log any album by entering its title and artist.")+
+  `<div class="toolbar"><span class="muted">${result.length} ${result.length===1?"album":"albums"}${state.query?` matching “${esc(state.query)}”`:""}</span><div class="actions"><select class="select" id="genreFilter" aria-label="Filter by genre">${genres.map(g=>`<option ${state.genre===g?"selected":""}>${esc(g)}</option>`).join("")}</select><select class="select" id="browseSort" aria-label="Sort albums"><option value="title" ${state.sort==="title"?"selected":""}>Album A–Z</option><option value="artist" ${state.sort==="artist"?"selected":""}>Artist A–Z</option><option value="year" ${state.sort==="year"?"selected":""}>Newest release</option></select></div></div>`+
+  (result.length?grid(result):empty("It’s not in your collection yet","Add it manually with “Log a listen.”"))+
+  '<p class="hint" style="margin-top:25px">Album covers are illustrated placeholders. Search currently covers this collection.</p>';
+}
+function diary(){
+  const entries=sortedEntries().filter(e=>state.diaryFilter==="rated"?e.rating>0:state.diaryFilter==="reviewed"?e.review.trim():state.diaryFilter==="mine"?!e.demo:true);
+  return heading("Every listen, every take","Your diary","Log repeat listens and see how your opinions change.")+
+  `<div class="toolbar"><span class="muted">${entries.length} ${entries.length===1?"entry":"entries"}</span><select id="diaryFilter" class="select" aria-label="Filter diary">${[["all","All entries"],["mine","My entries only"],["rated","Rated listens"],["reviewed","With a review"]].map(([v,l])=>`<option value="${v}" ${v===state.diaryFilter?"selected":""}>${l}</option>`).join("")}</select></div>`+
+  (entries.length?`<div class="entries">${entries.map(entryCard).join("")}</div>`:empty("A clean slate","Your next album is your first entry here."));
+}
+function queue(){
+  return heading("Save it for later","Your listening queue","A home for every “I need to listen to that.”")+
+  (data.queue.length?grid(data.queue.map(album)):empty("What’s next?","Open an album and select “Want to listen.”","browse","Find an album"));
+}
+function albumPage(){
+  const a=album(state.id);if(!a)return empty("Album not found","Browse the collection to find another album.","browse","Browse");
+  const entries=albumEntries(a.id);
+  const favorite=data.favorites.includes(a.id),queued=data.queue.includes(a.id);
+  const inLists=data.lists.filter(l=>l.albumIds.includes(a.id));
+  return `<button class="breadcrumb" data-act="nav" data-view="browse">← Back to browse</button>
+  <section class="detail">
+    ${art(a)}
+    <div><p class="eyebrow">${esc(a.genre)}${a.year?" · "+a.year:""}</p><h1>${esc(a.title)}</h1><p class="artist-name">${esc(a.artist)}</p>
+      <div class="detail-rating">${ratingMarkup(avg(entries))}</div><p class="detail-copy">${entries.length?`${entries.length} ${entries.length===1?"listen":"listens"} in your diary · average of your rated listens`:"You haven’t logged this album yet."}</p>
+      <div class="actions"><button class="primary" data-act="log" data-id="${esc(a.id)}">＋ Log a listen</button><button class="secondary" data-act="queue-toggle" data-id="${esc(a.id)}">${queued?"✓ In your queue":"⊕ Want to listen"}</button><button class="secondary" data-act="favorite" data-id="${esc(a.id)}" aria-pressed="${favorite}">${favorite?"♥ Favorite":"♡ Favorite"}</button><button class="secondary" data-act="add-to-list" data-id="${esc(a.id)}">☷ Add to list</button></div>
+    </div>
+  </section>
+  ${section("Your listening history",entries.length?`<div class="entries">${entries.map(entryCard).join("")}</div>`:empty("Your opinion goes here","Give this album a listen, then tell yourself what you thought."))}
+  ${inLists.length?section("In your lists",`<div class="actions">${inLists.map(l=>`<button class="secondary" data-act="list" data-id="${esc(l.id)}">${esc(l.name)} →</button>`).join("")}</div>`):""}`;
+}
+function listCover(l){
+  const albums=l.albumIds.slice(0,2).map(album);
+  return albums.length?`<div class="list-cover">${albums.map(art).join("")}${albums.length===1?'<div class="art art-12"><span class="art-label">AUXED</span></div>':""}</div>`:'<div class="list-placeholder" aria-hidden="true">☷</div>';
+}
+function listsPage(){
+  return heading("Make room for a mood","Your lists","Rank your favorites, build a rotation, or collect a feeling.",'<button class="primary" data-act="new-list">＋ New list</button>')+
+  (data.lists.length?`<div class="list-grid">${data.lists.map(l=>`<article class="list-card"><button data-act="list" data-id="${esc(l.id)}">${listCover(l)}<h3>${esc(l.name)}</h3><p>${l.albumIds.length} ${l.albumIds.length===1?"album":"albums"}${l.demo?" · Sample list":""}</p></button><p style="margin-top:8px">${esc(l.description)}</p></article>`).join("")}</div>`:empty("Your taste deserves a collection","Start a list, then add and arrange albums.","new-list","Create a list"));
+}
+function listPage(){
+  const l=data.lists.find(l=>l.id===state.id);if(!l)return empty("List not found","Choose a list to open.","nav-lists","Your lists");
+  return `<button class="breadcrumb" data-act="nav" data-view="lists">← All lists</button><div style="height:20px"></div>`+
+  heading(`${l.albumIds.length} albums${l.demo?" · Sample list":""}`,l.name,l.description||"A collection, curated by you.",`<button class="secondary" data-act="edit-list" data-id="${esc(l.id)}">Edit list</button>`)+
+  (l.albumIds.length?`<div class="grid">${l.albumIds.map((id,i)=>`<div>${card(album(id))}<div class="reorder"><button data-act="move" data-id="${esc(l.id)}" data-index="${i}" data-step="-1" ${i===0?"disabled":""} aria-label="Move ${esc(album(id).title)} earlier">←</button><button data-act="move" data-id="${esc(l.id)}" data-index="${i}" data-step="1" ${i===l.albumIds.length-1?"disabled":""} aria-label="Move ${esc(album(id).title)} later">→</button></div></div>`).join("")}</div>`:empty("Pick the first album","Edit this list to add albums from your collection.","",""))+
+  `<div class="actions" style="margin-top:30px"><button class="danger small" data-act="delete-list" data-id="${esc(l.id)}">Delete list</button></div>`;
+}
+function profile(){
+  const mine=data.entries.filter(e=>!e.demo);
+  const artists=new Map();
+  mine.forEach(e=>{const name=album(e.albumId).artist;artists.set(name,(artists.get(name)||0)+1)});
+  const top=[...artists].sort((a,b)=>b[1]-a[1]).slice(0,5);
+  return `<p class="eyebrow">Your corner of music</p><div class="profile-header"><div class="avatar">${esc(initials(data.profile.name))}</div><div><h1>${esc(data.profile.name||"Your profile")}</h1><p>${esc(data.profile.bio)}</p></div><div class="actions"><button class="secondary small" data-act="edit-profile">Edit profile</button></div></div>
+  <div class="stats"><div class="stat"><strong>${mine.length}</strong><span>your listens</span></div><div class="stat"><strong>${mine.filter(e=>e.review.trim()).length}</strong><span>your written reviews</span></div><div class="stat"><strong>${data.favorites.length}</strong><span>favorite albums</span></div></div>
+  ${section("Your favorites",data.favorites.length?grid(data.favorites.map(album)):empty("The albums that stick","Tap the heart on any album to put it here.","browse","Explore albums"))}
+  ${section("Your most logged artists",top.length?`<div class="settings">${top.map(([name,n])=>`<div class="artist-row"><strong>${esc(name)}</strong><span>${n} ${n===1?"listen":"listens"}</span></div>`).join("")}</div>`:empty("Find your rotation","Your own diary entries will build this list.","",""))}
+  ${section("Your data",`<div class="settings"><h3 style="margin-bottom:0">Keep your collection close</h3><p>Your diary is saved in this browser. Download a backup to keep a copy or move it to another browser.</p><div class="actions"><button class="secondary small" data-act="export">↓ Download backup</button><button class="secondary small" data-act="import">↑ Restore backup</button>${data.entries.some(e=>e.demo)||data.lists.some(l=>l.demo)?'<button class="ghost small" data-act="remove-demo">Remove sample data</button>':""}</div></div>`)}`;
+}
+function render(){
+  renderNav();updateSaveNotice();
+  $("content").innerHTML=({home,browse,diary,queue,album:albumPage,lists:listsPage,list:listPage,profile}[state.view]||home)();
+}
+function openDialog(title,body){
+  if($("modal").open)$("modal").close();
+  $("dialogTitle").textContent=title;$("dialogBody").innerHTML=body;$("modal").showModal();
+}
+function updateRating(){
+  const v=Number($("rating").value);
+  $("ratingOutput").textContent=v?v.toFixed(1)+" / 5":"Not rated";
+  $("rating").setAttribute("aria-valuetext",v?v+" out of 5":"Not rated");
+}
+function openLog(albumId=null,entryId=null){
+  const entry=entryId?data.entries.find(e=>e.id===entryId):null;
+  const a=album(entry?.albumId||albumId);
+  openDialog(entry?"Edit your listen":"Log a listen",`
+  <form class="form" id="logForm" data-entry="${esc(entry?.id||"")}">
+    <div class="field"><label for="albumTitle">Album title</label><input id="albumTitle" list="albumTitles" autocomplete="off" maxlength="200" required value="${esc(a?.title||"")}" placeholder="What album did you listen to?"><datalist id="albumTitles">${data.albums.map(a=>`<option value="${esc(a.title)}">${esc(a.artist)}</option>`).join("")}</datalist></div>
+    <div class="field"><label for="albumArtist">Artist</label><input id="albumArtist" maxlength="200" required value="${esc(a?.artist||"")}" placeholder="Artist name"></div>
+    <div class="row">
+      <div class="field"><label for="listenDate">Date listened</label><input id="listenDate" type="date" required value="${esc(entry?.date||today())}"></div>
+      <div class="field"><div class="rating-display"><label for="rating">Your rating</label><output id="ratingOutput" class="hint"></output></div><input id="rating" type="range" min="0" max="5" step=".5" value="${entry?.rating||0}"><p class="hint">Half-star steps. Slide to 0 to leave unrated.</p></div>
+    </div>
+    <div class="field"><label for="review">Your take <span class="muted">(optional)</span></label><textarea id="review" maxlength="10000" placeholder="What hit? What didn’t?">${esc(entry?.review||"")}</textarea></div>
+    <div class="field"><label for="tags">Tags <span class="muted">(comma separated)</span></label><input id="tags" maxlength="500" value="${esc(entry?.tags.join(", ")||"")}" placeholder="late night, on repeat, road trip"></div>
+    <label class="checkbox"><input type="checkbox" id="logFavorite" ${a&&data.favorites.includes(a.id)?"checked":""}>♥ Add this album to my favorites</label>
+    <div class="form-bottom">${entry?`<button class="danger small" type="button" data-act="delete-entry" data-id="${esc(entry.id)}">Delete</button>`:""}<button class="secondary" type="button" data-act="close">Cancel</button><button class="primary" type="submit">${entry?"Save changes":"Save listen"}</button></div>
+  </form>`);
+  updateRating();
+}
+function openListEditor(id=null,preselect=null){
+  const l=data.lists.find(l=>l.id===id);
+  const selected=new Set(l?.albumIds||[]);if(preselect)selected.add(preselect);
+  openDialog(l?"Edit list":"Create a list",`
+    <form class="form" id="listForm" data-id="${esc(l?.id||"")}">
+    <div class="field"><label for="listName">List name</label><input id="listName" required maxlength="120" value="${esc(l?.name||"")}" placeholder="Albums I wish I could hear again for the first time"></div>
+    <div class="field"><label for="listDescription">Description</label><textarea id="listDescription" maxlength="2000" placeholder="What brings these albums together?">${esc(l?.description||"")}</textarea></div>
+    <div class="field"><label for="pickerSearch">Choose albums</label><input id="pickerSearch" type="search" placeholder="Filter this collection"></div>
+    <div class="album-picker">${[...data.albums].sort((a,b)=>a.title.localeCompare(b.title)).map(a=>`<label class="pick-row"><input type="checkbox" name="albumIds" value="${esc(a.id)}" ${selected.has(a.id)?"checked":""}><span><strong>${esc(a.title)}</strong><small>${esc(a.artist)}</small></span></label>`).join("")}</div>
+    <p class="hint">Use the arrows on your list page to arrange its albums.</p>
+    <div class="form-bottom"><button class="secondary" type="button" data-act="close">Cancel</button><button class="primary" type="submit">Save list</button></div>
+    </form>`);
+}
+function openAddToList(id){
+  if(!data.lists.length){openListEditor(null,id);return}
+  const a=album(id);
+  openDialog("Add to a list",`<div class="form"><p class="hint">Choose a list for <strong>${esc(a.title)}</strong>.</p>${data.lists.map(l=>`<button class="secondary" data-act="list-add" data-id="${esc(l.id)}" data-album="${esc(id)}" ${l.albumIds.includes(id)?"disabled":""}>${l.albumIds.includes(id)?"✓":"＋"} ${esc(l.name)}</button>`).join("")}<button class="primary" data-act="new-list-album" data-id="${esc(id)}">＋ Create a new list</button></div>`);
+}
+function editProfile(){
+  openDialog("Make it yours",`<form id="profileForm" class="form"><div class="field"><label for="profileName">Display name</label><input id="profileName" required maxlength="60" value="${esc(data.profile.name)}"></div><div class="field"><label for="profileBio">Bio</label><textarea id="profileBio" maxlength="300">${esc(data.profile.bio)}</textarea></div><div class="form-bottom"><button type="button" class="secondary" data-act="close">Cancel</button><button class="primary" type="submit">Save profile</button></div></form>`);
+}
+function removeDemo(){
+  if(!confirm("Remove the sample diary entries and sample lists? Your own saved listens, favorites, and queue will stay."))return;
+  data.entries=data.entries.filter(e=>!e.demo);data.lists=data.lists.filter(l=>!l.demo);commit("Sample data removed");
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob),link=document.createElement("a");
+  link.href=url;link.download=`auxed-backup-${today()}.json`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+document.addEventListener("click",event=>{
+  const b=event.target.closest("[data-act]");if(!b||b.disabled)return;
+  const id=b.dataset.id,action=b.dataset.act;
+  if(action==="nav")route(b.dataset.view);
+  else if(action==="nav-lists")route("lists");
+  else if(action==="browse")route("browse");
+  else if(action==="album")route("album",id);
+  else if(action==="list")route("list",id);
+  else if(action==="log")openLog(id||null);
+  else if(action==="edit-entry")openLog(null,id);
+  else if(action==="close")$("modal").close();
+  else if(action==="queue-toggle"){
+    const exists=data.queue.includes(id);
+    data.queue=exists?data.queue.filter(x=>x!==id):[...data.queue,id];
+    commit(exists?"Removed from your queue":"Saved to your listening queue");
+  }
+  else if(action==="favorite"){
+    const exists=data.favorites.includes(id);
+    data.favorites=exists?data.favorites.filter(x=>x!==id):[...data.favorites,id];
+    commit(exists?"Removed from favorites":"Added to your favorites");
+  }
+  else if(action==="delete-entry"){
+    if(!confirm("Delete this diary entry?"))return;
+    data.entries=data.entries.filter(e=>e.id!==id);$("modal").close();commit("Diary entry deleted");
+  }
+  else if(action==="new-list")openListEditor();
+  else if(action==="edit-list")openListEditor(id);
+  else if(action==="add-to-list")openAddToList(id);
+  else if(action==="new-list-album")openListEditor(null,id);
+  else if(action==="list-add"){
+    const l=data.lists.find(l=>l.id===id);if(!l)return;
+    if(!l.albumIds.includes(b.dataset.album))l.albumIds.push(b.dataset.album);
+    l.demo=false;$("modal").close();commit("Album added to "+l.name);
+  }
+  else if(action==="delete-list"){
+    if(!confirm("Delete this list? Your diary entries will stay."))return;
+    data.lists=data.lists.filter(l=>l.id!==id);state.view="lists";state.id=null;commit("List deleted");
+  }
+  else if(action==="move"){
+    const l=data.lists.find(l=>l.id===id),i=Number(b.dataset.index),j=i+Number(b.dataset.step);
+    if(!l||j<0||j>=l.albumIds.length)return;
+    [l.albumIds[i],l.albumIds[j]]=[l.albumIds[j],l.albumIds[i]];l.demo=false;commit("List order updated");
+  }
+  else if(action==="edit-profile")editProfile();
+  else if(action==="remove-demo")removeDemo();
+  else if(action==="export")exportData();
+  else if(action==="import")$("importFile").click();
+});
+document.addEventListener("submit",event=>{
+  const f=event.target;
+  if(!["logForm","listForm","profileForm"].includes(f.id))return;
+  event.preventDefault();
+  if(f.id==="logForm"){
+    const title=$("albumTitle").value.trim(),artist=$("albumArtist").value.trim();
+    if(!title||!artist){toast("Add an album title and artist.");return}
+    let a=data.albums.find(a=>a.title.toLowerCase()===title.toLowerCase()&&a.artist.toLowerCase()===artist.toLowerCase());
+    if(!a){a={id:uid("album"),title,artist,year:null,genre:"Uncategorized",art:(data.albums.length%12)+1};data.albums.push(a)}
+    const id=f.dataset.entry;
+    const entry={id:id||uid("entry"),albumId:a.id,date:$("listenDate").value,rating:Number($("rating").value),review:$("review").value.trim(),tags:[...new Set($("tags").value.split(",").map(t=>t.trim()).filter(Boolean))].slice(0,10),demo:false};
+    if(id){const index=data.entries.findIndex(e=>e.id===id);if(index>=0)data.entries[index]=entry}else data.entries.unshift(entry);
+    data.favorites=data.favorites.filter(x=>x!==a.id);if($("logFavorite").checked)data.favorites.push(a.id);
+    data.queue=data.queue.filter(x=>x!==a.id);
+    $("modal").close();commit(id?"Your listen is updated":"Listen saved to your diary");
+  }
+  else if(f.id==="listForm"){
+    const name=$("listName").value.trim();if(!name){toast("Give your list a name.");return}
+    const checked=[...f.querySelectorAll('input[name="albumIds"]:checked')].map(el=>el.value);
+    const old=data.lists.find(l=>l.id===f.dataset.id);
+    const ordered=old?[...old.albumIds.filter(id=>checked.includes(id)),...checked.filter(id=>!old.albumIds.includes(id))]:checked;
+    const l={id:old?.id||uid("list"),name,description:$("listDescription").value.trim(),albumIds:ordered,demo:false};
+    if(old)data.lists[data.lists.indexOf(old)]=l;else data.lists.unshift(l);
+    $("modal").close();state.view="list";state.id=l.id;commit("List saved");
+  }
+  else{
+    const name=$("profileName").value.trim();if(!name){toast("Add a display name.");return}
+    data.profile={name,bio:$("profileBio").value.trim()};$("modal").close();commit("Profile updated");
+  }
+});
+$("search").addEventListener("input",event=>{
+  state.query=event.target.value;state.view="browse";state.id=null;render();
+});
+document.addEventListener("input",event=>{
+  if(event.target.id==="rating")updateRating();
+  if(event.target.id==="pickerSearch"){
+    const query=event.target.value.toLowerCase();
+    $("listForm").querySelectorAll(".pick-row").forEach(row=>row.hidden=!row.textContent.toLowerCase().includes(query));
+  }
+});
+document.addEventListener("change",event=>{
+  const el=event.target;
+  if(el.id==="genreFilter"){state.genre=el.value;render()}
+  if(el.id==="browseSort"){state.sort=el.value;render()}
+  if(el.id==="diaryFilter"){state.diaryFilter=el.value;render()}
+  if(el.id==="albumTitle"){
+    const a=data.albums.find(a=>a.title.toLowerCase()===el.value.trim().toLowerCase());
+    if(a){$("albumArtist").value=a.artist;$("logFavorite").checked=data.favorites.includes(a.id)}
+  }
+});
+$("importFile").addEventListener("change",async event=>{
+  const file=event.target.files[0];if(!file)return;
+  try{
+    if(file.size>10*1024*1024)throw new Error("Please choose an Auxed backup smaller than 10 MB.");
+    const restored=JSON.parse(await file.text());
+    if(!validate(restored))throw new Error("This file isn’t a valid Auxed backup.");
+    if(!confirm(`Restore ${restored.entries.length} diary entries and ${restored.lists.length} lists? This will replace your current Auxed collection in this browser.`))return;
+    data=restored;state.view="home";state.id=null;state.query="";state.genre="All genres";$("search").value="";commit("Your backup has been restored");
+  }catch(error){toast(error instanceof SyntaxError?"This file isn’t valid JSON. Choose an Auxed backup.":error.message)}
+  finally{event.target.value=""}
+});
+render();
+</script>
+</body>
+</html>
